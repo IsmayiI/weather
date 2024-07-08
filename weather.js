@@ -19,6 +19,23 @@ const saveToken = async (token) => {
    }
 }
 
+const getForcast = async () => {
+   try {
+      const weather = await getWeather('London')
+      console.log(weather)
+   } catch (e) {
+      if (e?.response?.status === 404) {
+         printError('неверно указан город')
+      }
+      else if (e?.response?.status === 401) {
+         printError('неверно указан токен')
+      }
+      else {
+         printError(e.message)
+      }
+   }
+}
+
 const initCLI = () => {
    const args = getArgs(process.argv)
 
@@ -29,7 +46,7 @@ const initCLI = () => {
       saveToken(args.t)
    }
 
-   getWeather('London')
+   getForcast()
 }
 
 initCLI()

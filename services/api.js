@@ -10,6 +10,10 @@ const getCoordinates = async (city, token) => {
       }
    })
 
+   if (!coord.length) {
+      throw new Error('неверно указан город')
+   }
+
    return {
       lat: coord[0].lat,
       lon: coord[0].lon
@@ -24,6 +28,7 @@ export const getWeather = async (city) => {
 
    const coord = await getCoordinates(city, token)
 
+
    const { data: weather } = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
       params: {
          lat: coord.lat,
@@ -32,5 +37,5 @@ export const getWeather = async (city) => {
       }
    })
 
-   console.log(weather);
+   return weather
 }
