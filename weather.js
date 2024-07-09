@@ -1,28 +1,35 @@
 #!/usr/bin/env node
 
 import { getArgs } from "./helpers/args.js";
-import { getWeather } from "./services/api.js";
-import { printHelp, printError, printSuccess } from "./services/logService.js";
+import { getIcon, getWeather } from "./services/api.js";
+import { printHelp, printError, printSuccess, printWeather } from "./services/logService.js";
 import { saveKeyValue, TOKEN_DICTIONARY } from "./services/storage.js";
 
 const saveToken = async (token) => {
-   if (!token.length) {
-      printError('не передан token')
-      return
-   }
-
    try {
       await saveKeyValue(TOKEN_DICTIONARY.token, token)
-      printSuccess('токен сохранён')
+      if (token?.length) printSuccess('токен сохранён')
    } catch (e) {
       printError(e.message)
    }
 }
 
+
+const saveCity = async (city) => {
+   try {
+      await saveKeyValue(TOKEN_DICTIONARY.city, city)
+      if (city?.length) printSuccess('город сохранён')
+
+   } catch (e) {
+      printError(e.message)
+   }
+
+}
+
 const getForcast = async () => {
    try {
-      const weather = await getWeather('London')
-      console.log(weather)
+      const weather = await getWeather()
+      printWeather(weather, getIcon(weather.weather[0].icon))
    } catch (e) {
       if (e?.response?.status === 404) {
          printError('неверно указан город')
@@ -31,22 +38,23 @@ const getForcast = async () => {
          printError('неверно указан токен')
       }
       else {
+         'не понял'
          printError(e.message)
       }
    }
 }
 
-const initCLI = () => {
+const initCLI = async () => {
    const args = getArgs(process.argv)
 
-   if (args.h) printHelp()
-   if (args.s) {
-   }
-   if (args.t) {
-      saveToken(args.t)
-   }
+   if (args.h) return printHelp()
 
-   getForcast()
+   if (args.s) await saveCity(args.s)
+
+   if (args.t) await saveToken(args.t)
+
+
+   await getForcast()
 }
 
 initCLI()
